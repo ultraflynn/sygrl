@@ -101,4 +101,9 @@ public class Main {
     model.put("science", "E=mc^2: " + energy + " = "  + m.toString());
     return "hello";
   }
+
+  @RequestMapping("/callback")
+  String callback(Map<String, Object> model) {
+    return "callback";
+  }
 }
