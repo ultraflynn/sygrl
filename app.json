@@ -1,0 +1,5 @@
+{
+  "name": "Synthetic Gorilla Management Tool",
+  "description": "Manages the assets of the Synthetic Gorilla corporation. Provides notifications that jobs are finished and when PI needs collecting.",
+  "addons": [ "heroku-postgresql" ]
+}
