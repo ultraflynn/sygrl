@@ -1,29 +1,12 @@
-/*
- * Copyright 2002-2014 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.ultraflynn.sygrl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -31,8 +14,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.jscience.physics.amount.Amount;
 import org.jscience.physics.model.RelativisticModel;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -139,14 +120,15 @@ public class Main {
                 httpPost.setEntity(new UrlEncodedFormEntity(params));
 
                 Optional.ofNullable(client.execute(httpPost).getEntity()).ifPresent(entity -> {
-                    JSONObject results = (JSONObject) JSONValue.parse(entity.toString());
+                    ObjectMapper mapper = new ObjectMapper();
+                    AccessToken accessToken = mapper.convertValue(entity, AccessToken.class);
 
                     model.put("code", "code: " + code);
                     model.put("state", "state: " + state);
-                    model.put("access_token", "access_token: " + results.get("access_token"));
-                    model.put("token_type", "token_type: " + results.get("token_type"));
-                    model.put("expires_in", "expires_in: " + results.get("expires_in"));
-                    model.put("refresh_token", "refresh_token: " + results.get("refresh_token"));
+                    model.put("access_token", "access_token: " + accessToken.getAccessToken());
+                    model.put("token_type", "token_type: " + accessToken.getTokenType());
+                    model.put("expires_in", "expires_in: " + accessToken.getExpiresIn());
+                    model.put("refresh_token", "refresh_token: " + accessToken.getRefreshToken());
 
                     // TODO Now put this is the DB
                 });
