@@ -140,7 +140,9 @@ public class Main {
 
                 CloseableHttpResponse response = client.execute(httpPost);
                 Optional.ofNullable(response.getEntity()).ifPresent(entity -> {
-                    JSONObject results = (JSONObject) JSONValue.parse(entity.toString());
+                    String s = entity.toString();
+                    System.out.println(s);
+                    JSONObject results = (JSONObject) JSONValue.parse(s);
 
                     model.put("code", "code: " + code);
                     model.put("state", "state: " + state);
