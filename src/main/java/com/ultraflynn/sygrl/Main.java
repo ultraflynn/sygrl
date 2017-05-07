@@ -138,7 +138,8 @@ public class Main {
                 params.add(new BasicNameValuePair("code", code));
                 httpPost.setEntity(new UrlEncodedFormEntity(params));
 
-                Optional.ofNullable(client.execute(httpPost).getEntity()).ifPresent(entity -> {
+                CloseableHttpResponse response = client.execute(httpPost);
+                Optional.ofNullable(response.getEntity()).ifPresent(entity -> {
                     JSONObject results = (JSONObject) JSONValue.parse(entity.toString());
 
                     model.put("code", "code: " + code);
