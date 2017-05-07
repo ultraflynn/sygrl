@@ -18,15 +18,21 @@ package com.ultraflynn.sygrl;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
+import org.apache.http.auth.AuthenticationException;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.jscience.physics.amount.Amount;
 import org.jscience.physics.model.RelativisticModel;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -48,13 +54,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static javax.measure.unit.SI.KILOGRAM;
 
 @Controller
 @SpringBootApplication
 public class Main {
-
     @Value("${spring.datasource.url}")
     private String dbUrl;
 
@@ -116,36 +122,49 @@ public class Main {
 
     @RequestMapping("/callback")
     String callback(Map<String, Object> model, @RequestParam("code") String code, @RequestParam("state") String state) {
-        model.put("code", "Code: " + code);
-        model.put("state", "State: " + state);
+        try {
+            try (CloseableHttpClient client = HttpClients.createDefault()) {
+                HttpPost httpPost = new HttpPost("https://login.eveonline.com/oauth/token");
+
+                String clientId = System.getenv().get("CLIENT_ID");
+                String secretKey = System.getenv().get("SECRET_KEY");
+
+                UsernamePasswordCredentials creds
+                        = new UsernamePasswordCredentials(clientId, secretKey);
+                httpPost.addHeader(new BasicScheme().authenticate(creds, httpPost, null));
+
+                List<NameValuePair> params = new ArrayList<>();
+                params.add(new BasicNameValuePair("grant_type", "authorization_code"));
+                params.add(new BasicNameValuePair("code", code));
+                httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+                Optional.ofNullable(client.execute(httpPost).getEntity()).ifPresent(entity -> {
+                    JSONObject results = (JSONObject) JSONValue.parse(entity.toString());
+
+                    model.put("code", "code: " + code);
+                    model.put("state", "state: " + state);
+                    model.put("access_token", "access_token: " + results.get("access_token"));
+                    model.put("token_type", "token_type: " + results.get("token_type"));
+                    model.put("expires_in", "expires_in: " + results.get("expires_in"));
+                    model.put("refresh_token", "refresh_token: " + results.get("refresh_token"));
+
+                    // TODO Now put this is the DB
+                });
+            }
+        } catch (IOException | AuthenticationException e) {
+            e.printStackTrace();
+        }
         return "callback";
     }
 
     @RequestMapping("/authorize")
     RedirectView authorize(RedirectAttributes attributes) {
+        String clientId = System.getenv().get("CLIENT_ID");
         attributes.addAttribute("response_type", "code");
         attributes.addAttribute("redirect_uri", "https://still-temple-92202.herokuapp.com/callback");
-        attributes.addAttribute("client_id", "76e816d6809442af94a2e0b4e965460c");
+        attributes.addAttribute("client_id", clientId);
         attributes.addAttribute("scope", "publicData characterStatsRead");
         attributes.addAttribute("state", "AAA");
         return new RedirectView("https://login.eveonline.com/oauth/authorize");
     }
-    /*
-
-        try {
-            try (CloseableHttpClient client = HttpClients.createDefault()) {
-                HttpPost httpPost = new HttpPost("http://www.example.com");
-
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair("username", "John"));
-                params.add(new BasicNameValuePair("password", "pass"));
-                httpPost.setEntity(new UrlEncodedFormEntity(params));
-
-                CloseableHttpResponse response = client.execute(httpPost);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-     */
 }
