@@ -29,7 +29,10 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import javax.measure.quantity.Mass;
 import javax.sql.DataSource;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static javax.measure.unit.SI.KILOGRAM;
 
@@ -122,9 +126,14 @@ public class Main {
                 httpPost.setEntity(new UrlEncodedFormEntity(params));
 
                 Optional.ofNullable(client.execute(httpPost).getEntity()).ifPresent(entity -> {
-                    ObjectMapper mapper = new ObjectMapper();
-                    mapper.setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
-                    AccessToken accessToken = mapper.convertValue(entity, AccessToken.class);
+                    ObjectMapper mapper = new ObjectMapper().setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
+                    String json;
+                    try {
+                        json = inputStreamToString(entity.getContent());
+                    } catch (IOException e) {
+                        json = e.getMessage();
+                    }
+                    AccessToken accessToken = mapper.convertValue(json, AccessToken.class);
 
                     model.put("code", "code: " + code);
                     model.put("state", "state: " + state);
@@ -140,6 +149,12 @@ public class Main {
             e.printStackTrace();
         }
         return "callback";
+    }
+
+    private String inputStreamToString(InputStream stream) throws IOException {
+        try (BufferedReader buffer = new BufferedReader(new InputStreamReader(stream))) {
+            return buffer.lines().collect(Collectors.joining("\n"));
+        }
     }
 
     @RequestMapping("/authorize")
