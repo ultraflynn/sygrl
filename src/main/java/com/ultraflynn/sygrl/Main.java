@@ -2,6 +2,7 @@ package com.ultraflynn.sygrl;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -126,24 +127,20 @@ public class Main {
                 httpPost.setEntity(new UrlEncodedFormEntity(params));
 
                 Optional.ofNullable(client.execute(httpPost).getEntity()).ifPresent(entity -> {
-                    ObjectMapper mapper = new ObjectMapper().setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
-                    String json;
                     try {
-                        json = inputStreamToString(entity.getContent());
+                        JsonNode jsonNode = new ObjectMapper().readTree(entity.getContent());
+
+                        model.put("code", "code: " + code);
+                        model.put("state", "state: " + state);
+                        model.put("access_token", "access_token: " + jsonNode.get("access_token"));
+                        model.put("token_type", "token_type: " + jsonNode.get("token_type"));
+                        model.put("expires_in", "expires_in: " + jsonNode.get("expires_in"));
+                        model.put("refresh_token", "refresh_token: " + jsonNode.get("refresh_token"));
+
+                        // TODO Now put this is the DB
                     } catch (IOException e) {
-                        json = e.getMessage();
+                        throw new RuntimeException(e);
                     }
-                    System.out.println("JSON: ^" + json + "^");
-                    AccessToken accessToken = mapper.convertValue(json, AccessToken.class);
-
-                    model.put("code", "code: " + code);
-                    model.put("state", "state: " + state);
-                    model.put("access_token", "access_token: " + accessToken.getAccessToken());
-                    model.put("token_type", "token_type: " + accessToken.getTokenType());
-                    model.put("expires_in", "expires_in: " + accessToken.getExpiresIn());
-                    model.put("refresh_token", "refresh_token: " + accessToken.getRefreshToken());
-
-                    // TODO Now put this is the DB
                 });
             }
         } catch (IOException | AuthenticationException e) {
