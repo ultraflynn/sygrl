@@ -133,6 +133,7 @@ public class Main {
                     } catch (IOException e) {
                         json = e.getMessage();
                     }
+                    System.out.println("JSON: ^" + json + "^");
                     AccessToken accessToken = mapper.convertValue(json, AccessToken.class);
 
                     model.put("code", "code: " + code);
