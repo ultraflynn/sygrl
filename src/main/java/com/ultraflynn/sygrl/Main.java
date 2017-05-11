@@ -64,27 +64,6 @@ public class Main {
         return "index";
     }
 
-    @RequestMapping("/db")
-    String db(Map<String, Object> model) {
-        try (Connection connection = dataSource.getConnection()) {
-            Statement stmt = connection.createStatement();
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS ticks (tick timestamp)");
-            stmt.executeUpdate("INSERT INTO ticks VALUES (now())");
-            ResultSet rs = stmt.executeQuery("SELECT tick FROM ticks");
-
-            ArrayList<String> output = new ArrayList<String>();
-            while (rs.next()) {
-                output.add("Read from DB: " + rs.getTimestamp("tick"));
-            }
-
-            model.put("records", output);
-            return "db";
-        } catch (Exception e) {
-            model.put("message", e.getMessage());
-            return "error";
-        }
-    }
-
     @Bean
     public DataSource dataSource() throws SQLException {
         if (dbUrl == null || dbUrl.isEmpty()) {
@@ -109,7 +88,9 @@ public class Main {
     }
 
     @RequestMapping("/callback")
-    String callback(Map<String, Object> model, @RequestParam("code") String code, @RequestParam("state") String state) {
+    String callback(Map<String, Object> model,
+                    @RequestParam("code") String code,
+                    @RequestParam("state") String state) {
         try {
             try (CloseableHttpClient client = HttpClients.createDefault()) {
                 HttpPost httpPost = new HttpPost("https://login.eveonline.com/oauth/token");
@@ -132,12 +113,13 @@ public class Main {
 
                         model.put("code", "code: " + code);
                         model.put("state", "state: " + state);
-                        model.put("access_token", "access_token: " + jsonNode.get("access_token"));
-                        model.put("token_type", "token_type: " + jsonNode.get("token_type"));
-                        model.put("expires_in", "expires_in: " + jsonNode.get("expires_in"));
-                        model.put("refresh_token", "refresh_token: " + jsonNode.get("refresh_token"));
 
-                        // TODO Now put this is the DB
+                        String accessToken = jsonNode.get("access_token").asText();
+                        String tokenType = jsonNode.get("token_type").asText();
+                        int expiresIn = jsonNode.get("expires_in").asInt();
+                        String refreshToken = jsonNode.get("refresh_token").asText();
+
+                        saveToDb(model, accessToken, tokenType, expiresIn, refreshToken);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -149,9 +131,26 @@ public class Main {
         return "callback";
     }
 
-    private String inputStreamToString(InputStream stream) throws IOException {
-        try (BufferedReader buffer = new BufferedReader(new InputStreamReader(stream))) {
-            return buffer.lines().collect(Collectors.joining("\n"));
+    private void saveToDb(Map<String, Object> model, String accessToken, String tokenType,
+                          int expiresIn, String refreshToken) {
+        try (Connection connection = dataSource.getConnection()) {
+            Statement stmt = connection.createStatement();
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS tokens (access_token text, token_type text, expires_in integer, refresh_token text");
+            stmt.executeUpdate("INSERT INTO tokens VALUES ('" + accessToken +  "','" +
+                    tokenType + "','" + expiresIn + "','" + refreshToken + "')");
+            ResultSet rs = stmt.executeQuery("SELECT access_token, token_type, expires_in, refresh_token FROM tokens");
+
+//            ArrayList<String> output = new ArrayList<String>();
+//            while (rs.next()) {
+//                output.add("Read from DB: " + rs.getTimestamp("tick"));
+//            }
+//
+            model.put("access_token", "access_token: " + accessToken);
+            model.put("token_type", "token_type: " + tokenType);
+            model.put("expires_in", "expires_in: " + expiresIn);
+            model.put("refresh_token", "refresh_token: " + refreshToken);
+        } catch (Exception e) {
+            model.put("message", e.getMessage());
         }
     }
 
