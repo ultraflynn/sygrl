@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'hello')}">
+<body>
+<div class="container">
+    <p th:text="${access_token}"/>
+    <p th:text="${token_type}"/>
+    <p th:text="${expires_in}"/>
+    <p th:text="${refresh_token}"/>
+</div>
+</body>
+</html>

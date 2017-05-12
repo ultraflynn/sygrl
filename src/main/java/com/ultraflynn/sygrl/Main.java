@@ -1,7 +1,5 @@
 package com.ultraflynn.sygrl;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
@@ -30,10 +28,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import javax.measure.quantity.Mass;
 import javax.sql.DataSource;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,7 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static javax.measure.unit.SI.KILOGRAM;
 
@@ -136,15 +130,8 @@ public class Main {
         try (Connection connection = dataSource.getConnection()) {
             Statement stmt = connection.createStatement();
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS tokens (access_token text, token_type text, expires_in integer, refresh_token text)");
-            stmt.executeUpdate("INSERT INTO tokens VALUES ('" + accessToken +  "','" +
-                    tokenType + "','" + expiresIn + "','" + refreshToken + "')");
-            ResultSet rs = stmt.executeQuery("SELECT access_token, token_type, expires_in, refresh_token FROM tokens");
+            stmt.executeUpdate("INSERT INTO tokens VALUES ('" + accessToken + "','" + tokenType + "','" + expiresIn + "','" + refreshToken + "')");
 
-//            ArrayList<String> output = new ArrayList<String>();
-//            while (rs.next()) {
-//                output.add("Read from DB: " + rs.getTimestamp("tick"));
-//            }
-//
             model.put("access_token", "access_token: " + accessToken);
             model.put("token_type", "token_type: " + tokenType);
             model.put("expires_in", "expires_in: " + expiresIn);
@@ -163,5 +150,54 @@ public class Main {
         attributes.addAttribute("scope", "publicData characterStatsRead");
         attributes.addAttribute("state", "AAA");
         return new RedirectView("https://login.eveonline.com/oauth/authorize");
+    }
+
+    @RequestMapping("/refresh")
+    String refresh(Map<String, Object> model) {
+        try (Connection connection = dataSource.getConnection()) {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT refresh_token FROM tokens");
+            while (rs.next()) {
+                refreshToken(model, rs.getString("refresh_token"));
+            }
+        } catch (Exception e) {
+            model.put("message", e.getMessage());
+        }
+        return "refresh";
+    }
+
+    private void refreshToken(Map<String, Object> model, String refreshToken) {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpPost httpPost = new HttpPost("https://login.eveonline.com/oauth/token");
+
+            String clientId = System.getenv().get("CLIENT_ID");
+            String secretKey = System.getenv().get("SECRET_KEY");
+
+            UsernamePasswordCredentials creds
+                    = new UsernamePasswordCredentials(clientId, secretKey);
+            httpPost.addHeader(new BasicScheme().authenticate(creds, httpPost, null));
+
+            List<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair("grant_type", "refresh_token"));
+            params.add(new BasicNameValuePair("refresh_token", refreshToken));
+            httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+            Optional.ofNullable(client.execute(httpPost).getEntity()).ifPresent(entity -> {
+                try {
+                    JsonNode jsonNode = new ObjectMapper().readTree(entity.getContent());
+
+                    String accessToken = jsonNode.get("access_token").asText();
+                    String tokenType = jsonNode.get("token_type").asText();
+                    int expiresIn = jsonNode.get("expires_in").asInt();
+                    String newRefreshToken = jsonNode.get("refresh_token").asText();
+
+                    saveToDb(model, accessToken, tokenType, expiresIn, newRefreshToken);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (IOException | AuthenticationException e) {
+            e.printStackTrace();
+        }
     }
 }
