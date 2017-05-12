@@ -135,7 +135,7 @@ public class Main {
                           int expiresIn, String refreshToken) {
         try (Connection connection = dataSource.getConnection()) {
             Statement stmt = connection.createStatement();
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS tokens (access_token text, token_type text, expires_in integer, refresh_token text");
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS tokens (access_token text, token_type text, expires_in integer, refresh_token text)");
             stmt.executeUpdate("INSERT INTO tokens VALUES ('" + accessToken +  "','" +
                     tokenType + "','" + expiresIn + "','" + refreshToken + "')");
             ResultSet rs = stmt.executeQuery("SELECT access_token, token_type, expires_in, refresh_token FROM tokens");
