@@ -139,7 +139,7 @@ public class Main {
             if (saveType == SaveType.INSERT) {
                 sql = Optional.of("INSERT INTO tokens VALUES (now(), '" + accessToken + "','" + tokenType + "','" + expiresIn + "','" + refreshToken + "')");
             } else if (saveType == SaveType.UPDATE) {
-                sql = Optional.of("UPDATE tokens SET updated = now(), access_token '" + accessToken + "', token_type = '" + tokenType + "', expires_in = '" + expiresIn + "' WHERE refresh_token = '"  + refreshToken + "'");
+                sql = Optional.of("UPDATE tokens SET updated = now(), access_token = '" + accessToken + "', token_type = '" + tokenType + "', expires_in = '" + expiresIn + "' WHERE refresh_token = '"  + refreshToken + "'");
             }
             sql.ifPresent(s -> {
                 try {
