@@ -135,18 +135,31 @@ public class Main {
             Statement stmt = connection.createStatement();
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS tokens (updated timestamp, access_token text, token_type text, expires_in integer, refresh_token text)");
 
+            Optional<String> sql = Optional.empty();
             if (saveType == SaveType.INSERT) {
-                stmt.executeUpdate("INSERT INTO tokens VALUES (now(), '" + accessToken + "','" + tokenType + "','" + expiresIn + "','" + refreshToken + "')");
+                sql = Optional.of("INSERT INTO tokens VALUES (now(), '" + accessToken + "','" + tokenType + "','" + expiresIn + "','" + refreshToken + "')");
             } else if (saveType == SaveType.UPDATE) {
-                stmt.executeUpdate("UPDATE tokens SET updated = now(), access_token '" + accessToken + "', token_type = '" + tokenType + "', expires_in = '" + expiresIn + "' WHERE refresh_token = '"  + refreshToken + "'");
+                sql = Optional.of("UPDATE tokens SET updated = now(), access_token '" + accessToken + "', token_type = '" + tokenType + "', expires_in = '" + expiresIn + "' WHERE refresh_token = '"  + refreshToken + "'");
             }
+            sql.ifPresent(s -> {
+                try {
+                    System.out.println(s);
+                    stmt.executeUpdate(s);
+                } catch (SQLException e) {
+                    model.put("message", e.getMessage());
+                    e.printStackTrace();
+                }
 
-            model.put("access_token", "access_token: " + accessToken);
-            model.put("token_type", "token_type: " + tokenType);
-            model.put("expires_in", "expires_in: " + expiresIn);
-            model.put("refresh_token", "refresh_token: " + refreshToken);
+                // TODO Introduce slf4j/log4j
+
+                model.put("access_token", "access_token: " + accessToken);
+                model.put("token_type", "token_type: " + tokenType);
+                model.put("expires_in", "expires_in: " + expiresIn);
+                model.put("refresh_token", "refresh_token: " + refreshToken);
+            });
         } catch (Exception e) {
             model.put("message", e.getMessage());
+            e.printStackTrace();
         }
     }
 
