@@ -133,12 +133,12 @@ public class Main {
                           int expiresIn, String refreshToken) {
         try (Connection connection = dataSource.getConnection()) {
             Statement stmt = connection.createStatement();
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS tokens (access_token text, token_type text, expires_in integer, refresh_token text)");
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS tokens (updated timestamp, access_token text, token_type text, expires_in integer, refresh_token text)");
 
             if (saveType == SaveType.INSERT) {
-                stmt.executeUpdate("INSERT INTO tokens VALUES ('" + accessToken + "','" + tokenType + "','" + expiresIn + "','" + refreshToken + "')");
+                stmt.executeUpdate("INSERT INTO tokens VALUES (now(), '" + accessToken + "','" + tokenType + "','" + expiresIn + "','" + refreshToken + "')");
             } else if (saveType == SaveType.UPDATE) {
-                stmt.executeUpdate("UPDATE tokens SET access_token '" + accessToken + "', token_type = '" + tokenType + "', expires_in = '" + expiresIn + "' WHERE refresh_token = '"  + refreshToken + "'");
+                stmt.executeUpdate("UPDATE tokens SET updated = now(), access_token '" + accessToken + "', token_type = '" + tokenType + "', expires_in = '" + expiresIn + "' WHERE refresh_token = '"  + refreshToken + "'");
             }
 
             model.put("access_token", "access_token: " + accessToken);
