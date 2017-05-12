@@ -113,7 +113,7 @@ public class Main {
                         int expiresIn = jsonNode.get("expires_in").asInt();
                         String refreshToken = jsonNode.get("refresh_token").asText();
 
-                        saveToDb(model, accessToken, tokenType, expiresIn, refreshToken);
+                        saveToDb(SaveType.INSERT, model, accessToken, tokenType, expiresIn, refreshToken);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -125,12 +125,21 @@ public class Main {
         return "callback";
     }
 
-    private void saveToDb(Map<String, Object> model, String accessToken, String tokenType,
+    private enum SaveType {
+        INSERT, UPDATE
+    }
+
+    private void saveToDb(SaveType saveType, Map<String, Object> model, String accessToken, String tokenType,
                           int expiresIn, String refreshToken) {
         try (Connection connection = dataSource.getConnection()) {
             Statement stmt = connection.createStatement();
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS tokens (access_token text, token_type text, expires_in integer, refresh_token text)");
-            stmt.executeUpdate("INSERT INTO tokens VALUES ('" + accessToken + "','" + tokenType + "','" + expiresIn + "','" + refreshToken + "')");
+
+            if (saveType == SaveType.INSERT) {
+                stmt.executeUpdate("INSERT INTO tokens VALUES ('" + accessToken + "','" + tokenType + "','" + expiresIn + "','" + refreshToken + "')");
+            } else if (saveType == SaveType.UPDATE) {
+                stmt.executeUpdate("UPDATE tokens SET access_token '" + accessToken + "', token_type = '" + tokenType + "', expires_in = '" + expiresIn + "' WHERE refresh_token = '"  + refreshToken + "'");
+            }
 
             model.put("access_token", "access_token: " + accessToken);
             model.put("token_type", "token_type: " + tokenType);
@@ -191,7 +200,7 @@ public class Main {
                     int expiresIn = jsonNode.get("expires_in").asInt();
                     String newRefreshToken = jsonNode.get("refresh_token").asText();
 
-                    saveToDb(model, accessToken, tokenType, expiresIn, newRefreshToken);
+                    saveToDb(SaveType.UPDATE, model, accessToken, tokenType, expiresIn, newRefreshToken);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
