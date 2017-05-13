@@ -30,6 +30,7 @@ public class EveOnlineSSO implements SSOAuthenticator {
     private Function<HttpEntity, AccessToken> generateAccessToken = entity -> {
         try {
             JsonNode jsonNode = objectMapper.readTree(entity.getContent());
+            logger.info("Response {}", jsonNode);
 
             String accessToken = jsonNode.get("access_token").asText();
             int expiresIn = jsonNode.get("expires_in").asInt();
@@ -93,6 +94,7 @@ public class EveOnlineSSO implements SSOAuthenticator {
                     .map(entity -> {
                         try {
                             JsonNode jsonNode = objectMapper.readTree(entity.getContent());
+                            logger.info("Response {}", jsonNode);
 
                             int characterId = jsonNode.get("CharacterID").asInt();
                             String characterName = jsonNode.get("CharacterName").asText();
