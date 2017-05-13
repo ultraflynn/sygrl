@@ -94,11 +94,11 @@ public class EveOnlineSSO implements SSOAuthenticator {
                         try {
                             JsonNode jsonNode = objectMapper.readTree(entity.getContent());
 
-                            int characterId = jsonNode.get("character_id").asInt();
-                            String characterName = jsonNode.get("character_name").asText();
-                            LocalDateTime expiresOn = LocalDateTime.parse(jsonNode.get("").asText());
-                            String scopes = jsonNode.get("scopes").asText();
-                            String characterOwnerHash = jsonNode.get("character_own_hash").asText();
+                            int characterId = jsonNode.get("CharacterID").asInt();
+                            String characterName = jsonNode.get("CharacterName").asText();
+                            LocalDateTime expiresOn = LocalDateTime.parse(jsonNode.get("ExpiresOn").asText());
+                            String scopes = jsonNode.get("Scopes").asText();
+                            String characterOwnerHash = jsonNode.get("CharacterOwnerHash").asText();
 
                             return new User(accessToken, characterId, characterName, expiresOn, scopes, characterOwnerHash);
                         } catch (IOException e) {
