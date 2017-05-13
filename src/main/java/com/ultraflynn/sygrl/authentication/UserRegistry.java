@@ -1,4 +1,6 @@
-package com.ultraflynn.sygrl;
+package com.ultraflynn.sygrl.authentication;
+
+import com.ultraflynn.sygrl.Repository;
 
 public class UserRegistry {
     private final SSOAuthenticator authenticator;
@@ -13,7 +15,7 @@ public class UserRegistry {
         AuthorizationCode authorizationCode = authenticator.requestAuthorizationCode();
         AccessToken accessToken = authenticator.requestAccessToken(authorizationCode);
         User user = authenticator.requestCharacterInfo(accessToken);
-        repository.saveUser(user);
+        repository.createUser(user);
         return user;
     }
 
@@ -24,6 +26,6 @@ public class UserRegistry {
                     AccessToken accessToken = authenticator.revalidateToken(user.getToken());
                     return user.withUpdatedToken(accessToken);
                 })
-                .forEach(repository::saveUser);
+                .forEach(repository::createUser);
     }
 }

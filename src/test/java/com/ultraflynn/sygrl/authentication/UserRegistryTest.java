@@ -1,6 +1,7 @@
-package com.ultraflynn.sygrl;
+package com.ultraflynn.sygrl.authentication;
 
 import com.google.common.collect.ImmutableList;
+import com.ultraflynn.sygrl.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +18,8 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserRegistryTest {
+    private static final LocalDateTime NOW = LocalDateTime.now();
+
     @Mock
     private SSOAuthenticator authenticator;
 
@@ -45,8 +48,8 @@ public class UserRegistryTest {
     @Test
     public void shouldAddNewUser() {
         AuthorizationCode authorizationCode = new AuthorizationCode();
-        AccessToken accessToken = new AccessToken(LocalDateTime.now(), 1200);
-        User authenticatedUser = new User(accessToken);
+        AccessToken accessToken = new AccessToken(LocalDateTime.now(), 1200, "access token", "refresh token");
+        User authenticatedUser = new User(accessToken, 364, "name", NOW, "scopes", "owner hash");
 
         when(authenticator.requestAuthorizationCode()).thenReturn(authorizationCode);
         when(authenticator.requestAccessToken(authorizationCode)).thenReturn(accessToken);
@@ -54,7 +57,7 @@ public class UserRegistryTest {
 
         User user = registry.addNewUser();
 
-        verify(repository).saveUser(authenticatedUser);
+        verify(repository).createUser(authenticatedUser);
 
         assertEquals(user, authenticatedUser);
     }
@@ -64,8 +67,8 @@ public class UserRegistryTest {
         when(expiredToken.hasExpired()).thenReturn(true);
         when(validToken.hasExpired()).thenReturn(false);
 
-        User userOne = new User(expiredToken);
-        User userTwo = new User(validToken);
+        User userOne = new User(expiredToken, 364, "name", NOW, "scopes", "owner hash");
+        User userTwo = new User(validToken, 365, "name", NOW, "scopes", "owner hash");
 
         List<User> users = ImmutableList.of(userOne, userTwo);
         when(repository.getAllUsers()).thenReturn(users);
@@ -74,7 +77,7 @@ public class UserRegistryTest {
         registry.revalidateAllTokens();
 
         verify(authenticator).revalidateToken(expiredToken);
-        verify(repository).saveUser(updatedUser.capture());
+        verify(repository).createUser(updatedUser.capture());
         verifyNoMoreInteractions(authenticator);
 
         assertEquals(newToken, updatedUser.getValue().getToken());

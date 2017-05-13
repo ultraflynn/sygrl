@@ -1,4 +1,4 @@
-package com.ultraflynn.sygrl;
+package com.ultraflynn.sygrl.authentication;
 
 public interface SSOAuthenticator {
     AuthorizationCode requestAuthorizationCode();

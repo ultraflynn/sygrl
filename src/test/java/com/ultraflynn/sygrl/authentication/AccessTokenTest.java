@@ -1,4 +1,4 @@
-package com.ultraflynn.sygrl;
+package com.ultraflynn.sygrl.authentication;
 
 import org.junit.Test;
 
@@ -10,31 +10,31 @@ import static org.junit.Assert.assertTrue;
 public class AccessTokenTest {
     @Test
     public void shouldKnowWhenNotExpired() {
-        AccessToken accessToken = new AccessToken(LocalDateTime.now(), 1200);
+        AccessToken accessToken = new AccessToken(LocalDateTime.now(), 1200, "access_token", "refresh token");
         assertFalse(accessToken.hasExpired());
     }
 
     @Test
     public void shouldKnowWhenOnExpiryCutover() {
-        AccessToken accessToken = new AccessToken(LocalDateTime.now().minusSeconds(1200), 1200);
+        AccessToken accessToken = new AccessToken(LocalDateTime.now().minusSeconds(1200), 1200, "access_token", "refresh token");
         assertTrue(accessToken.hasExpired());
     }
 
     @Test
     public void shouldKnowWhenWellOverExpiry() {
-        AccessToken accessToken = new AccessToken(LocalDateTime.now().minusSeconds(1500), 1200);
+        AccessToken accessToken = new AccessToken(LocalDateTime.now().minusSeconds(1500), 1200, "access_token", "refresh token");
         assertTrue(accessToken.hasExpired());
     }
 
     @Test
     public void shouldKnowWhenCloseToExpiry() {
-        AccessToken accessToken = new AccessToken(LocalDateTime.now().minusSeconds(1080), 1200);
+        AccessToken accessToken = new AccessToken(LocalDateTime.now().minusSeconds(1080), 1200, "access_token", "refresh token");
         assertTrue(accessToken.hasExpired());
     }
 
     @Test
     public void shouldKnowWhenCloseToExpiryButStillValid() {
-        AccessToken accessToken = new AccessToken(LocalDateTime.now().minusSeconds(1079), 1200);
+        AccessToken accessToken = new AccessToken(LocalDateTime.now().minusSeconds(1079), 1200, "access_token", "refresh token");
         assertFalse(accessToken.hasExpired());
     }
 }

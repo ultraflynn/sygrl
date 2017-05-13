@@ -13,8 +13,6 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.jscience.physics.amount.Amount;
-import org.jscience.physics.model.RelativisticModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import javax.measure.quantity.Mass;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
@@ -38,8 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static javax.measure.unit.SI.KILOGRAM;
-
 @Controller
 @SpringBootApplication
 public class Main {
@@ -49,6 +44,9 @@ public class Main {
     @Autowired
     private DataSource dataSource;
 
+    @Autowired
+    private Repository repository;
+
     public static void main(String[] args) throws Exception {
         SpringApplication.run(Main.class, args);
     }
@@ -56,6 +54,17 @@ public class Main {
     @RequestMapping("/")
     String index() {
         return "index";
+    }
+
+    @RequestMapping("/initialize")
+    String initialize() {
+        repository.initialize();
+        return "initialize";
+    }
+
+    @Bean
+    public Repository repository() throws SQLException {
+        return new PostgresRepository(dataSource());
     }
 
     @Bean
@@ -67,18 +76,6 @@ public class Main {
             config.setJdbcUrl(dbUrl);
             return new HikariDataSource(config);
         }
-    }
-
-    @RequestMapping("/hello")
-    String hello(Map<String, Object> model) {
-        RelativisticModel.select();
-        String energy = System.getenv().get("ENERGY");
-        if (energy == null) {
-            energy = "12 GeV";
-        }
-        Amount<Mass> m = Amount.valueOf(energy).to(KILOGRAM);
-        model.put("science", "E=mc^2: " + energy + " = " + m.toString());
-        return "hello";
     }
 
     @RequestMapping("/callback")
@@ -149,8 +146,6 @@ public class Main {
                     model.put("message", e.getMessage());
                     e.printStackTrace();
                 }
-
-                // TODO Introduce slf4j/log4j
 
                 model.put("access_token", "access_token: " + accessToken);
                 model.put("token_type", "token_type: " + tokenType);
