@@ -1,9 +1,9 @@
 package com.ultraflynn.sygrl.authentication;
 
 public interface SSOAuthenticator {
-    AuthorizationCode requestAuthorizationCode();
+    String requestState();
 
-    AccessToken requestAccessToken(AuthorizationCode authorizationCode);
+    AccessToken requestAccessToken(String code, String state);
 
     User requestCharacterInfo(AccessToken accessToken);
 

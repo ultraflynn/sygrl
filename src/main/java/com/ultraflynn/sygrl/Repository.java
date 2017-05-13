@@ -14,7 +14,7 @@ public interface Repository {
      * Update a new user
      * @param user User
      */
-    void createUser(User user);
+    User createUser(User user);
 
     /**
      * Update an existing user

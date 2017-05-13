@@ -47,15 +47,15 @@ public class UserRegistryTest {
 
     @Test
     public void shouldAddNewUser() {
-        AuthorizationCode authorizationCode = new AuthorizationCode();
         AccessToken accessToken = new AccessToken(LocalDateTime.now(), 1200, "access token", "refresh token");
         User authenticatedUser = new User(accessToken, 364, "name", NOW, "scopes", "owner hash");
 
-        when(authenticator.requestAuthorizationCode()).thenReturn(authorizationCode);
-        when(authenticator.requestAccessToken(authorizationCode)).thenReturn(accessToken);
+        when(authenticator.requestState()).thenReturn("state");
+        when(authenticator.requestAccessToken("code", "state")).thenReturn(accessToken);
         when(authenticator.requestCharacterInfo(accessToken)).thenReturn(authenticatedUser);
+        when(repository.createUser(authenticatedUser)).thenReturn(authenticatedUser);
 
-        User user = registry.addNewUser();
+        User user = registry.addNewUser("code", "state");
 
         verify(repository).createUser(authenticatedUser);
 

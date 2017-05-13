@@ -38,7 +38,7 @@ public class PostgresRepository implements Repository {
     }
 
     @Override
-    public void createUser(User user) {
+    public User createUser(User user) {
         try (Connection connection = dataSource.getConnection()) {
             Statement stmt = connection.createStatement();
             String sql = "INSERT INTO users VALUES (" +
@@ -57,6 +57,7 @@ public class PostgresRepository implements Repository {
             e.printStackTrace();
             Thread.currentThread().interrupt();
         }
+        return user;
     }
 
     @Override

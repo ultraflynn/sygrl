@@ -11,12 +11,10 @@ public class UserRegistry {
         this.repository = repository;
     }
 
-    public User addNewUser() {
-        AuthorizationCode authorizationCode = authenticator.requestAuthorizationCode();
-        AccessToken accessToken = authenticator.requestAccessToken(authorizationCode);
+    public User addNewUser(String code, String state) {
+        AccessToken accessToken = authenticator.requestAccessToken(code, state);
         User user = authenticator.requestCharacterInfo(accessToken);
-        repository.createUser(user);
-        return user;
+        return repository.createUser(user);
     }
 
     public void revalidateAllTokens() {
