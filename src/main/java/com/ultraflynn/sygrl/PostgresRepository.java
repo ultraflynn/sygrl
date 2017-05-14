@@ -66,7 +66,7 @@ public class PostgresRepository implements Repository {
             String sql = "UPDATE users SET " +
                     "scopes = '" + user.getScopes() + "', " +
                     "character_owner_hash = '" + user.getCharacterOwnerHash() + "', " +
-                    Optional.ofNullable(user.getTokenTimestamp()).map(dt -> Timestamp.valueOf(dt)).map(t -> "token_timestamp = " + t + ", ").orElse("") +
+                    Optional.ofNullable(user.getTokenTimestamp()).map(dt -> Timestamp.valueOf(dt)).map(t -> "token_timestamp = '" + t + "', ").orElse("") +
                     "access_token = '" + user.getAccessToken() + "', " +
                     "expires_in = '" + user.getExpiresIn() + "', " +
                     "updated = now() WHERE character_id = " + user.getCharacterId();
