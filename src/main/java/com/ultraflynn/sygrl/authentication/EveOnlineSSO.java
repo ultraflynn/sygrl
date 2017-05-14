@@ -7,6 +7,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -90,7 +91,10 @@ public class EveOnlineSSO implements SSOAuthenticator {
             params.add(new BasicNameValuePair("Bearer", accessToken.getAccessToken()));
             httpPost.setEntity(new UrlEncodedFormEntity(params));
 
-            return Optional.ofNullable(client.execute(httpPost).getEntity())
+            CloseableHttpResponse response = client.execute(httpPost);
+            logger.warn("status code {}", response.getStatusLine().getStatusCode());
+            logger.warn("reason phrase", response.getStatusLine().getReasonPhrase());
+            return Optional.ofNullable(response.getEntity())
                     .map(entity -> {
                         try {
                             JsonNode jsonNode = objectMapper.readTree(entity.getContent());
