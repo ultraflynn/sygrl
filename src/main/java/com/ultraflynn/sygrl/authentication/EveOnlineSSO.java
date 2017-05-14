@@ -8,10 +8,12 @@ import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,22 +80,11 @@ public class EveOnlineSSO implements SSOAuthenticator {
     @Override
     public User requestCharacterInfo(AccessToken accessToken) {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpPost httpPost = new HttpPost("https://login.eveonline.com/oauth/verify");
+            HttpGet httpGet = new HttpGet("https://login.eveonline.com/oauth/verify");
+            httpGet.addHeader("Authorization", "Bearer " + accessToken.getAccessToken());
 
-            String clientId = System.getenv().get("CLIENT_ID");
-            String secretKey = System.getenv().get("SECRET_KEY");
-
-            UsernamePasswordCredentials creds
-                    = new UsernamePasswordCredentials(clientId, secretKey);
-            httpPost.addHeader(new BasicScheme().authenticate(creds, httpPost, null));
-
-            List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair("Bearer", accessToken.getAccessToken()));
-            httpPost.setEntity(new UrlEncodedFormEntity(params));
-
-            CloseableHttpResponse response = client.execute(httpPost);
-            logger.warn("status code {}", response.getStatusLine().getStatusCode());
-            logger.warn("reason phrase", response.getStatusLine().getReasonPhrase());
+            CloseableHttpResponse response = client.execute(httpGet);
+            // TODO Check the response for errors
             return Optional.ofNullable(response.getEntity())
                     .map(entity -> {
                         try {
@@ -112,7 +103,7 @@ public class EveOnlineSSO implements SSOAuthenticator {
                         }
                     })
                     .orElseThrow(() -> new RuntimeException("Failed to obtain access token"));
-        } catch (IOException | AuthenticationException e) {
+        } catch (IOException e) {
             logger.error("Error requesting access token", e);
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
