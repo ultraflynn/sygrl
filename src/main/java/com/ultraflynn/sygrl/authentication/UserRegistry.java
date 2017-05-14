@@ -18,7 +18,7 @@ public class UserRegistry {
     }
 
     public void revalidateAllTokens() {
-        repository.getAllUsers().stream()
+        repository.getAllUsers().parallelStream()
                 .filter(User::hasTokenExpired)
                 .map(user -> {
                     AccessToken accessToken = authenticator.revalidateToken(user.getToken());
