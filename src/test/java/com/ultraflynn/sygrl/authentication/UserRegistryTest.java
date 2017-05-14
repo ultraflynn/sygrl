@@ -1,7 +1,7 @@
 package com.ultraflynn.sygrl.authentication;
 
 import com.google.common.collect.ImmutableList;
-import com.ultraflynn.sygrl.*;
+import com.ultraflynn.sygrl.Repository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,8 +18,6 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserRegistryTest {
-    private static final LocalDateTime NOW = LocalDateTime.now();
-
     @Mock
     private SSOAuthenticator authenticator;
 
@@ -48,7 +46,7 @@ public class UserRegistryTest {
     @Test
     public void shouldAddNewUser() {
         AccessToken accessToken = new AccessToken(LocalDateTime.now(), 1200, "access token", "refresh token");
-        User authenticatedUser = new User(accessToken, 364, "name", NOW, "scopes", "owner hash");
+        User authenticatedUser = new User(accessToken, 364, "name", "scopes", "owner hash");
 
         when(authenticator.requestState()).thenReturn("state");
         when(authenticator.requestAccessToken("code", "state")).thenReturn(accessToken);
@@ -67,8 +65,8 @@ public class UserRegistryTest {
         when(expiredToken.hasExpired()).thenReturn(true);
         when(validToken.hasExpired()).thenReturn(false);
 
-        User userOne = new User(expiredToken, 364, "name", NOW, "scopes", "owner hash");
-        User userTwo = new User(validToken, 365, "name", NOW, "scopes", "owner hash");
+        User userOne = new User(expiredToken, 364, "name", "scopes", "owner hash");
+        User userTwo = new User(validToken, 365, "name", "scopes", "owner hash");
 
         List<User> users = ImmutableList.of(userOne, userTwo);
         when(repository.getAllUsers()).thenReturn(users);

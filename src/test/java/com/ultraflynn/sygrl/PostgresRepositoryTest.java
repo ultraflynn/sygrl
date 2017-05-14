@@ -105,7 +105,6 @@ public class PostgresRepositoryTest {
         assertTrue(users.size() == 1);
         assertEquals(1219, users.get(0).getCharacterId());
         assertEquals("character name", users.get(0).getCharacterName());
-        assertTrue(users.get(0).getExpiresOn().isEqual(NOW));
         assertEquals("scopes", users.get(0).getScopes());
         assertEquals("owner hash", users.get(0).getCharacterOwnerHash());
         assertEquals("access token", users.get(0).getAccessToken());

@@ -13,7 +13,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,11 +92,10 @@ public class EveOnlineSSO implements SSOAuthenticator {
 
                             int characterId = jsonNode.get("CharacterID").asInt();
                             String characterName = jsonNode.get("CharacterName").asText();
-                            LocalDateTime expiresOn = LocalDateTime.parse(jsonNode.get("ExpiresOn").asText());
                             String scopes = jsonNode.get("Scopes").asText();
                             String characterOwnerHash = jsonNode.get("CharacterOwnerHash").asText();
 
-                            return new User(accessToken, characterId, characterName, expiresOn, scopes, characterOwnerHash);
+                            return new User(accessToken, characterId, characterName, scopes, characterOwnerHash);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }

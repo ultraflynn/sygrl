@@ -65,5 +65,4 @@ public class Main {
         repository.initialize();
         return "initialize";
     }
-
 }

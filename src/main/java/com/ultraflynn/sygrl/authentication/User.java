@@ -6,16 +6,14 @@ public class User {
     private final AccessToken accessToken;
     private final int characterId;
     private final String characterName;
-    private final LocalDateTime expiresOn;
     private final String scopes;
     private final String characterOwnerHash;
 
     public User(AccessToken accessToken, int characterId, String characterName,
-                LocalDateTime expiresOn, String scopes, String characterOwnerHash) {
+                String scopes, String characterOwnerHash) {
         this.accessToken = accessToken;
         this.characterId = characterId;
         this.characterName = characterName;
-        this.expiresOn = expiresOn;
         this.scopes = scopes;
         this.characterOwnerHash = characterOwnerHash;
     }
@@ -29,7 +27,7 @@ public class User {
     }
 
     public User withUpdatedToken(AccessToken accessToken) {
-        return new User(accessToken, characterId, characterName, expiresOn, scopes, characterOwnerHash);
+        return new User(accessToken, characterId, characterName, scopes, characterOwnerHash);
     }
 
     public int getCharacterId() {
@@ -38,10 +36,6 @@ public class User {
 
     public String getCharacterName() {
         return characterName;
-    }
-
-    public LocalDateTime getExpiresOn() {
-        return expiresOn;
     }
 
     public String getScopes() {

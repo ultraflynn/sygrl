@@ -39,4 +39,10 @@ public class AuthorizationController {
         userRegistry.addNewUser(code, state);
         return "callback";
     }
+
+    @RequestMapping("/revalidate")
+    String revalidate(Map<String, Object> model) {
+        userRegistry.revalidateAllTokens();
+        return "revalidate";
+    }
 }

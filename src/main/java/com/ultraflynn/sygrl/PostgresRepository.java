@@ -25,9 +25,9 @@ public class PostgresRepository implements Repository {
         try (Connection connection = dataSource.getConnection()) {
             Statement stmt = connection.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS users (" +
-                    "character_id INTEGER, character_name TEXT, expires_on TIMESTAMP, scopes TEXT, " +
-                    "character_owner_hash TEXT, token_timestamp TIMESTAMP, access_token TEXT, " +
-                    "expires_in INTEGER, refresh_token TEXT, created TIMESTAMP, updated TIMESTAMP)";
+                    "character_id INTEGER, character_name TEXT, scopes TEXT, character_owner_hash TEXT, " +
+                    "token_timestamp TIMESTAMP, access_token TEXT, expires_in INTEGER, refresh_token TEXT, " +
+                    "created TIMESTAMP, updated TIMESTAMP)";
 
             logger.info(sql);
             stmt.executeUpdate(sql);
@@ -44,7 +44,6 @@ public class PostgresRepository implements Repository {
             String sql = "INSERT INTO users VALUES (" +
                     "'" + user.getCharacterId() + "', " +
                     "'" + user.getCharacterName() + "', " +
-                    "'" + user.getExpiresOn() + "', " +
                     "'" + user.getScopes() + "', " +
                     "'" + user.getCharacterOwnerHash() + "', " +
                     "'" + user.getTokenTimestamp() + "', " +
@@ -65,7 +64,6 @@ public class PostgresRepository implements Repository {
         try (Connection connection = dataSource.getConnection()) {
             Statement stmt = connection.createStatement();
             String sql = "UPDATE users SET " +
-                    "expires_on = '" + user.getExpiresOn() + "', " +
                     "scopes = '" + user.getScopes() + "', " +
                     "character_owner_hash = '" + user.getCharacterOwnerHash() + "', " +
                     Optional.ofNullable(user.getTokenTimestamp()).map(dt -> Timestamp.valueOf(dt)).map(t -> "token_timestamp = " + t + ", ").orElse("") +
@@ -85,8 +83,8 @@ public class PostgresRepository implements Repository {
 
         try (Connection connection = dataSource.getConnection()) {
             Statement stmt = connection.createStatement();
-            String sql = "SELECT character_id, character_name, expires_on, scopes, " +
-                    "character_owner_hash, token_timestamp, access_token, expires_in, refresh_token FROM users";
+            String sql = "SELECT character_id, character_name, scopes, character_owner_hash, token_timestamp, " +
+                    "access_token, expires_in, refresh_token FROM users";
             logger.info(sql);
             ResultSet rs = stmt.executeQuery(sql);
 
@@ -97,7 +95,6 @@ public class PostgresRepository implements Repository {
 
                 User user = new User(accessToken, rs.getInt("character_id"),
                         rs.getString("character_name"),
-                        rs.getTimestamp("expires_on").toLocalDateTime(),
                         rs.getString("scopes"), rs.getString("character_owner_hash"));
                 users.add(user);
             }
