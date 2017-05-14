@@ -1,6 +1,8 @@
-package com.ultraflynn.sygrl;
+package com.ultraflynn.sygrl.repository;
 
 import com.ultraflynn.sygrl.authentication.User;
+import com.ultraflynn.sygrl.repository.PostgresRepository;
+import com.ultraflynn.sygrl.repository.Repository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

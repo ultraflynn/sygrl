@@ -1,6 +1,6 @@
 package com.ultraflynn.sygrl.authentication;
 
-import com.ultraflynn.sygrl.Repository;
+import com.ultraflynn.sygrl.repository.Repository;
 
 public class UserRegistry {
     private final SSOAuthenticator authenticator;

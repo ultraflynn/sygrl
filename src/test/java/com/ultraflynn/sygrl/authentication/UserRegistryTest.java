@@ -1,7 +1,7 @@
 package com.ultraflynn.sygrl.authentication;
 
 import com.google.common.collect.ImmutableList;
-import com.ultraflynn.sygrl.Repository;
+import com.ultraflynn.sygrl.repository.Repository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

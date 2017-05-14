@@ -1,4 +1,4 @@
-package com.ultraflynn.sygrl;
+package com.ultraflynn.sygrl.repository;
 
 import com.google.common.collect.ImmutableList;
 import com.ultraflynn.sygrl.authentication.AccessToken;
@@ -95,7 +95,8 @@ public class PostgresRepository implements Repository {
 
                 User user = new User(accessToken, rs.getInt("character_id"),
                         rs.getString("character_name"),
-                        rs.getString("scopes"), rs.getString("character_owner_hash"));
+                        rs.getString("scopes"),
+                        rs.getString("character_owner_hash"));
                 users.add(user);
             }
         } catch (SQLException e) {

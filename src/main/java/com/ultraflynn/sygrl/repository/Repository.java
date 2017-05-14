@@ -1,4 +1,4 @@
-package com.ultraflynn.sygrl;
+package com.ultraflynn.sygrl.repository;
 
 import com.ultraflynn.sygrl.authentication.User;
 
