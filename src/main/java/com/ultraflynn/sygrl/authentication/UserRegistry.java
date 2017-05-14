@@ -24,6 +24,6 @@ public class UserRegistry {
                     AccessToken accessToken = authenticator.revalidateToken(user.getToken());
                     return user.withUpdatedToken(accessToken);
                 })
-                .forEach(repository::createUser);
+                .forEach(repository::updateUser);
     }
 }

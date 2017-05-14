@@ -75,7 +75,7 @@ public class UserRegistryTest {
         registry.revalidateAllTokens();
 
         verify(authenticator).revalidateToken(expiredToken);
-        verify(repository).createUser(updatedUser.capture());
+        verify(repository).updateUser(updatedUser.capture());
         verifyNoMoreInteractions(authenticator);
 
         assertEquals(newToken, updatedUser.getValue().getToken());
