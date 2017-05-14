@@ -87,7 +87,8 @@ public class EveOnlineSSO implements SSOAuthenticator {
             httpPost.addHeader(new BasicScheme().authenticate(creds, httpPost, null));
 
             List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair("bearer", accessToken.getAccessToken()));
+            params.add(new BasicNameValuePair("token_type", "Bearer"));
+            params.add(new BasicNameValuePair("access_token", accessToken.getAccessToken()));
             httpPost.setEntity(new UrlEncodedFormEntity(params));
 
             return Optional.ofNullable(client.execute(httpPost).getEntity())
