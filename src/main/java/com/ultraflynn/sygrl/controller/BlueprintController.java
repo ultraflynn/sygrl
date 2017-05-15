@@ -22,6 +22,9 @@ public class BlueprintController {
     }
 
     private void renderBlueprints(Map<String, Object> model, List<Blueprint> blueprints) {
-        blueprints.forEach(blueprint -> model.put(blueprint.getName(), blueprint.getJobEndDate()));
+        blueprints.forEach(blueprint -> {
+            model.put("name", blueprint.getName());
+            model.put("jobenddate", blueprint.getJobEndDate());
+        });
     }
 }

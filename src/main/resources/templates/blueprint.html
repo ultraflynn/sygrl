@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'hello')}">
 <body>
 <div class="container">
+    <p th:text="${name}"/>
+    <p th:text="${jobenddate}"/>
 </div>
 </body>
 </html>

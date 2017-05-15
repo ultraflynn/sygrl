@@ -1,5 +1,7 @@
 package com.ultraflynn.sygrl.industry;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -16,14 +18,21 @@ import java.util.Optional;
 public class Industry {
     private static final Logger logger = LoggerFactory.getLogger(Industry.class);
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     public List<Blueprint> getBlueprints() {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet httpGet = new HttpGet("https://esi.tech.ccp.is/latest/characters/96239915/industry/jobs/?token=knkSuVC4nh6_mDfReXME5WJRDu53fEcyXZmHfN0_KiJKJ6w5RfHhW_wz0yn7Se3Oic6Qcnu-WBLM-wfd8EAwUw2");
             CloseableHttpResponse response = client.execute(httpGet);
             return ImmutableList.of(Optional.ofNullable(response.getEntity())
                     .map(entity -> {
-                        logger.info("entity {}", entity);
-                        return new Blueprint("name", LocalDateTime.now());
+                        try {
+                            JsonNode jsonNode = objectMapper.readTree(entity.getContent());
+                            logger.info("Response {}", jsonNode);
+                            return new Blueprint("name", LocalDateTime.now());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     })
                     .orElseThrow(() -> new RuntimeException("Failed to obtain industry jobs")));
         } catch (IOException e) {
