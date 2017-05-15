@@ -26,7 +26,7 @@ public class AuthorizationController {
         attributes.addAttribute("response_type", "code");
         attributes.addAttribute("redirect_uri", "https://still-temple-92202.herokuapp.com/callback");
         attributes.addAttribute("client_id", clientId);
-        attributes.addAttribute("scope", "publicData characterStatsRead");
+        attributes.addAttribute("scope", "publicData characterStatsRead esi-industry.read_character_jobs.v1");
         attributes.addAttribute("state", ssoAuthenticator.requestState());
         return new RedirectView("https://login.eveonline.com/oauth/authorize");
     }
