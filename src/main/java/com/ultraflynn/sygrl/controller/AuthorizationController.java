@@ -33,15 +33,14 @@ public class AuthorizationController {
 
 
     @RequestMapping("/callback")
-    String callback(Map<String, Object> model,
-                    @RequestParam("code") String code,
+    String callback(@RequestParam("code") String code,
                     @RequestParam("state") String state) {
         userRegistry.addNewUser(code, state);
         return "callback";
     }
 
     @RequestMapping("/revalidate")
-    String revalidate(Map<String, Object> model) {
+    String revalidate() {
         userRegistry.revalidateAllTokens();
         return "revalidate";
     }

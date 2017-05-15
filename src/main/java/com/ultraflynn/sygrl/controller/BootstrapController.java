@@ -3,6 +3,7 @@ package com.ultraflynn.sygrl.controller;
 import com.ultraflynn.sygrl.authentication.EveOnlineSSO;
 import com.ultraflynn.sygrl.authentication.SSOAuthenticator;
 import com.ultraflynn.sygrl.authentication.UserRegistry;
+import com.ultraflynn.sygrl.industry.Industry;
 import com.ultraflynn.sygrl.repository.PostgresRepository;
 import com.ultraflynn.sygrl.repository.Repository;
 import com.zaxxer.hikari.HikariConfig;
@@ -48,6 +49,11 @@ public class BootstrapController {
     @Bean
     public SSOAuthenticator ssoAuthenticator() {
         return new EveOnlineSSO();
+    }
+
+    @Bean
+    public Industry industry() {
+        return new Industry();
     }
 
     @RequestMapping("/initialize")
