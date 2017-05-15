@@ -22,7 +22,7 @@ public class Industry {
 
     public List<Blueprint> getBlueprints() {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpGet httpGet = new HttpGet("https://esi.tech.ccp.is/latest/characters/96239915/industry/jobs/?token=knkSuVC4nh6_mDfReXME5WJRDu53fEcyXZmHfN0_KiJKJ6w5RfHhW_wz0yn7Se3Oic6Qcnu-WBLM-wfd8EAwUw2");
+            HttpGet httpGet = new HttpGet("https://esi.tech.ccp.is/latest/characters/96239915/industry/jobs/?token=wR6g4EJ7QxJJLkhV9qWelvLfOBnN-oT6fCEzwQ8Asoq8DMKxe8z81EPTT8FfS9wnlJMBuIRiSOV18QXWu6jbaA2");
             CloseableHttpResponse response = client.execute(httpGet);
             return ImmutableList.of(Optional.ofNullable(response.getEntity())
                     .map(entity -> {
