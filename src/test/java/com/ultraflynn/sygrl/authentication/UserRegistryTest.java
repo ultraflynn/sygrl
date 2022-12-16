@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,7 +48,6 @@ public class UserRegistryTest {
         AccessToken accessToken = new AccessToken(LocalDateTime.now(), 1200, "access token", "refresh token");
         User authenticatedUser = new User(accessToken, 364, "name", "scopes", "owner hash");
 
-        when(authenticator.requestState()).thenReturn("state");
         when(authenticator.requestAccessToken("code", "state")).thenReturn(accessToken);
         when(authenticator.requestCharacterInfo(accessToken)).thenReturn(authenticatedUser);
         when(repository.createUser(authenticatedUser)).thenReturn(authenticatedUser);

@@ -1,15 +1,13 @@
 package com.ultraflynn.sygrl.repository;
 
 import com.ultraflynn.sygrl.authentication.User;
-import com.ultraflynn.sygrl.repository.PostgresRepository;
-import com.ultraflynn.sygrl.repository.Repository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -21,7 +19,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -91,7 +89,6 @@ public class PostgresRepositoryTest {
         when(resultSet.next()).thenReturn(true).thenReturn(false);
         when(resultSet.getInt("character_id")).thenReturn(1219);
         when(resultSet.getString("character_name")).thenReturn("character name");
-        when(resultSet.getTimestamp("expires_on")).thenReturn(Timestamp.valueOf(NOW));
         when(resultSet.getString("scopes")).thenReturn("scopes");
         when(resultSet.getString("character_owner_hash")).thenReturn("owner hash");
         when(resultSet.getTimestamp("token_timestamp")).thenReturn(Timestamp.valueOf(NOW));
